@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Game {
+class Game: ObservableObject {
     private var players:[Player] = []
     private var startingPoints: Int = 0
     private var currentNumberOfThrows: Int = 0

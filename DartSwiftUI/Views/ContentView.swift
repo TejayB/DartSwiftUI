@@ -21,13 +21,13 @@ struct ContentView: View {
                 HStack {
                     Spacer()
                     NavigationLink(
-                        destination: GameView301(),
+                        destination: GameView(currentGame: Game(301)),
                         label: {
                             Text("301")
                         })
                     Spacer()
                     NavigationLink(
-                        destination: GameView501(),
+                        destination: GameView(currentGame: Game(501)),
                         label: {
                             Text("501")
                         })

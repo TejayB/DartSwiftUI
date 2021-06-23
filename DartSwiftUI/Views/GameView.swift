@@ -7,32 +7,29 @@
 
 import SwiftUI
 
-var currentGame: Game =  Game(301)
 
-struct GameView301: View {
+
+struct GameView: View {
+    @StateObject var currentGame: Game
+
+    @State private var counterPlayer1Color: Color = .green
+    @State private var counterPlayer2Color: Color = .red
     
-    init() {
-        currentGame = Game(301)
-    }
+    @State private var selectedMultiplierIndex = 0
+    @State private var button25Opacity: Double = 1.0
     
-    @State var counterPlayer1 = currentGame.getPlayer(0).getRemainingPoints()
-    @State var counterPlayer1Color: Color = .green
-    @State var counterPlayer2 = currentGame.getPlayer(1).getRemainingPoints()
-    @State var counterPlayer2Color: Color = .red
-    
-    @State var selectedMultiplierIndex = 0
-    @State var button25Opacity: Double = 1.0
-    
-    @State var throwIndicator1Opacity = 1.0
-    @State var throwIndicator2Opacity = 0.25
-    @State var throwIndicator3Opacity = 0.25
+    @State private var throwIndicator1Opacity = 1.0
+    @State private var throwIndicator2Opacity = 0.25
+    @State private var throwIndicator3Opacity = 0.25
     
     @State private var showingWinnigAlert = false
     @State private var showingWelcomeAlert = true
+    @State private var gameOver = false
+    
     
     var body: some View {
-        let textCounterPlayer1: Text = Text("\(self.counterPlayer1)")
-        let textCounterPlayer2: Text = Text("\(self.counterPlayer2)")
+        let textCounterPlayer1: Text = Text("\(currentGame.getPlayer(0).getRemainingPoints())")
+        let textCounterPlayer2: Text = Text("\(currentGame.getPlayer(1).getRemainingPoints())")
     
         VStack {
             // Player Label
@@ -199,14 +196,9 @@ struct GameView301: View {
                 Alert(
                     title: Text("🏆 You won! 🏆"),
                     message: Text(currentGame.getCurrentPlayer().getName() + " wins!"),
-                    primaryButton: .default(Text("New 301 Game")) {
+                    dismissButton: .default(Text("Dismiss")) {
+                        gameOver = true
                         showingWinnigAlert = false
-                        currentGame = Game(301)
-                        refreshUI()
-                    },
-                    secondaryButton: .default(Text("New 501 Game")) {
-                        showingWinnigAlert = false
-                        currentGame = Game(501)
                         refreshUI()
                     }
                 )
@@ -217,14 +209,27 @@ struct GameView301: View {
         }
     }
     
+    func onThrowButtonPressed(_ points: Int) {
+        if (!gameOver) {
+            var currentMultiplier: Int = selectedMultiplierIndex + 1
+            showingWinnigAlert = currentGame.tryThrow(points * currentMultiplier)
+            
+            if ((points * currentMultiplier) == 75){
+                currentMultiplier = 3
+                selectedMultiplierIndex = 2
+            }else{
+                refreshUI();
+            }
+        }
+    }
+    
     func undo() {
+        gameOver = false
         currentGame.undoThrow()
         refreshUI()
     }
     
     func refreshUI() {
-        counterPlayer1 = currentGame.getPlayer(0).getRemainingPoints()
-        counterPlayer2 = currentGame.getPlayer(1).getRemainingPoints()
         resetMulitiplier()
         changeColorPoints()
         toogleThrowIndicators()
@@ -268,24 +273,11 @@ struct GameView301: View {
             throwIndicator3Opacity = 0.25
         }
     }
-    
-    func onThrowButtonPressed(_ points: Int) {
-        var currentMultiplier: Int = selectedMultiplierIndex + 1
-        showingWinnigAlert = currentGame.tryThrow(points * currentMultiplier)
-        
-        if ((points * currentMultiplier) == 75){
-            currentMultiplier = 3
-            selectedMultiplierIndex = 2
-        }else{
-            refreshUI();
-        }
-        
-    }
 }
 
 struct GameView301_Previews: PreviewProvider {
     static var previews: some View {
-        GameView301()
+        GameView(currentGame: Game(301))
     }
 }
 
